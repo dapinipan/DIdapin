@@ -1,0 +1,4 @@
+bs4
+masa depan
+permintaan
+colorama
